@@ -227,7 +227,7 @@ void setup()
 
 void loop()
 {
-/*
+/* Commented Out For testing of other code.
   int direction = 1;
   for (int channel = 0; channel < NUM_TLCS * 16; channel += direction) {
        Tlc.clear();
@@ -249,13 +249,22 @@ void loop()
     delay(75);
   }*/
   
-	for (int j = 0; j < 4; j++) { //for each column in the LED MATRIX
-		for (int k = 0; k < 4; k++) { // for each LED in the column
-			Tlc.set(led[k][j], letter_B[j][k]);
+  int z = 0;
+	for (int j = 0; j < 5; j++) { //for each column in the LED MATRIX
+		for (int k = 0; k < 5; k++) { // for each LED in the column
+			Tlc.set(led[15-k][4-j], letter_R[j][k]);
 			Tlc.update();
-			delay(1000);
+			delay(20);
 		}
+		z++;
 	}
+/*
+	for (int q = 0; q < 16 * 5; q++) {
+		Tlc.set(q, 4095);
+		Tlc.update();
+		delay(50);
+	}*/
+	
 }
 
 
