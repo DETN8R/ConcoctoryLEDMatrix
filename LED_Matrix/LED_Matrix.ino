@@ -1,8 +1,11 @@
+//
+
 #include "Tlc5940.h"
 //#DEFINE brightness 4095
 int matrixWidth = 16;
 int matrixHeight = 5;
-
+int old_val = 0;
+int new_val =0;
 int led[16][5] = {
 	{0 , 16, 32, 48, 64},
 	{1 , 17, 33, 49, 65},
@@ -21,6 +24,11 @@ int led[16][5] = {
 	{14, 30, 46, 62, 78},
 	{15, 31, 47, 63, 79}
 };
+int led_buffer[48][5];
+
+
+int led_brightness[16][5];
+
 
 const int letter_A[5][5] = {
 	{0,4095,4095,4095,0},
@@ -213,12 +221,52 @@ const int letter_Z[5][5] = {
 
 void setup()
 {
-  /* Call Tlc.init() to setup the tlc.
-     You can optionally pass an initial PWM value (0 - 4095) for all channels.*/
+  // Call Tlc.init() to setup the tlc.
+   
   Tlc.init();
   Tlc.clear();
-  Serial.begin(9600);
+  
+  
+  
+  Serial.begin(19200);
+  vfdClear();
+  
+  
+  
+	for (int i = 0; i < 16; i++) {
+		for (int s = 0; s < 5; s++) {
+			led_brightness[i][s] = 0;
+		}
+	}
+  //test letter
+  for (int j = 0; j < 5; j++) { //for each column in the LED MATRIX
+		for (int k = 0; k < 5; k++) { // for each LED in the column
+			Tlc.set(led[15-k][4-j], letter_A[j][k]);
+			led_brightness[15-k][4-j] = letter_A[j][k];
+			vfdPos(3,1);
+			Serial.print(j);
+			vfdPos(4,1);
+			Serial.print(k);
+			vfdPos(1,1);
+			Serial.print(led_brightness[15-k][4-j]);
+			Serial.write("     ");
+			delay(250);
+		Tlc.update();
+		}
+		
+	}
+	Tlc.update();
+	delay(2000);
 }
+void readBuffer() {
+	
+
+
+
+}
+
+
+
 
 /* This loop will create a Knight Rider-like effect if you have LEDs plugged
    into all the TLC outputs.  NUM_TLCS is defined in "tlc_config.h" in the
@@ -227,47 +275,61 @@ void setup()
 
 void loop()
 {
-/* Commented Out For testing of other code.
-  int direction = 1;
-  for (int channel = 0; channel < NUM_TLCS * 16; channel += direction) {
-       Tlc.clear();
-
-    if (channel == 0) {
-      direction = 1;
-    } 
-	else {
-		Tlc.set(channel - 1, 1000);
-    }
-    Tlc.set(channel, 4095);
-    if (channel != NUM_TLCS * 16 - 1) {
-		Tlc.set(channel + 1, 1000);
-    } else {
-		direction = -1;
-    }
-
-    Tlc.update();
-    delay(75);
-  }*/
-  
-  int z = 0;
-	for (int j = 0; j < 5; j++) { //for each column in the LED MATRIX
-		for (int k = 0; k < 5; k++) { // for each LED in the column
-			Tlc.set(led[15-k][4-j], letter_R[j][k]);
-			Tlc.update();
-			delay(20);
-		}
-		z++;
+	vfdPos(1,1);
+	Serial.write("TEST123");
+	vfdPos(1,2);
+	Serial.write("Second Line");
+	for (int s = 4; s >= 0; s--) {
+	for (int i = 15; i >= 0; i--) {
+		
+			old_val = led_brightness[i][s];
+			
+			led_brightness[i][s] = 0;
+			
+			Tlc.set(led[i][s], led_brightness[i][s]);
+			
+			led_brightness[i-1][s] = old_val;
+			
+			Tlc.set(led[i-1][s], led_brightness[i-1][s]);
+			
+			Tlc.update();	
+			vfdPos(1,3);
+			Serial.write("Column: ");
+			Serial.print(i);
+			Serial.write(" ");
+			vfdPos(1, 4);
+			Serial.write("Row: ");
+			Serial.print(s);
+			vfdPos(10, 4);
+			Serial.print(old_val);
+			Serial.write(" ");
+			Serial.print(led_brightness[i+1][s]);
+			Serial.write("      ");
+			delay(250);
+		}			
 	}
-/*
-	for (int q = 0; q < 16 * 5; q++) {
-		Tlc.set(q, 4095);
+	
+	/*for (int d = 0; d < 80; d++) {
+		Tlc.set(d, 4095	);
 		Tlc.update();
-		delay(50);
+		delay(20);
 	}*/
 	
 }
 
 
 
+void vfdClear() {
+	Serial.write(254);
+	Serial.write(88);
+}
+void vfdPos(int column, int row) {
+	Serial.write(254);
+	Serial.write(71);
+	Serial.write(column);
+	Serial.write(row);
+}
+
+//int 
 
 
